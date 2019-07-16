@@ -1,0 +1,3 @@
+https://medium.com/@Keithweaver_/sending-emails-using-sendgrid-with-node-js-1ed879a94f7b
+
+https://codeburst.io/hitchhikers-guide-to-back-end-development-with-examples-3f97c70e0073
