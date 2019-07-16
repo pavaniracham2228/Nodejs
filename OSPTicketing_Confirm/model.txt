@@ -1,0 +1,11 @@
+const Joi = require('joi');
+
+exports.confirmRequestSchema = {
+  transaction_id: Joi.string().trim().required(),
+  name: Joi.string().trim().optional(),
+  digits: Joi.string().trim().optional(),
+  request_id: Joi.string().trim().optional(),
+  payment_timestamp: Joi.string().trim().optional(),
+  bank_approval_code: Joi.string().trim().optional(),
+  payment_type: Joi.string().trim().optional()
+}

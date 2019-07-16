@@ -1,0 +1,142 @@
+const Router = require('express');
+const controller = require('./controller');
+const router = new Router();
+
+/**
+  * @swagger
+  * definitions:
+  *   ConfirmTicketsRequest:
+  *     required:
+  *       - transaction_id
+  *     properties:
+  *       transaction_id:
+  *         type: number
+  *       name:
+  *         type: string
+  *       digits:
+  *         type: string
+  *   ConfirmTicketsResponse:
+  *     properties:
+  *       status:
+  *         schema:
+  *           $ref: '#/definitions/Status'
+  *       data:
+  *         properties:
+  *           order_id:
+  *             type: number
+  *           user_id:
+  *             type: string
+  *           payment_mode:
+  *             type: string
+  *           reservation_id:
+  *             type: number
+  *           total:
+  *             type: number
+  *           date_time:
+  *             type: string
+  *           pincode:
+  *             schema:
+  *               $ref: '#/definitions/Pincode'
+  *           attractions:
+  *             type: array
+  *             items:
+  *               $ref: '#/definitions/Tickets'
+  *   Pincode:
+  *     properties:
+  *       pin:
+  *         type: string
+  *       status:
+  *         type: string
+  *       expiry:
+  *         type: string
+  *       wot:
+  *         type: string
+  *   Tickets:
+  *     properties:
+  *       id:
+  *         type: number
+  *       title:
+  *         type: string
+  *       thumbnail:
+  *         type: string
+  *       redemption_info:
+  *         type: string
+  *       types:
+  *         type: array
+  *         items:
+  *           $ref: '#/definitions/Products'
+  *   Products:
+  *     properties:
+  *       description:
+  *         type: string
+  *       date:
+  *         type: string
+  *       time:
+  *         type: string
+  *       types:
+  *         schema:
+  *           $ref: '#/definitions/Types'
+  *       sub_total:
+  *         type: number
+  *   Types:
+  *     properties:
+  *       type:
+  *         type: string
+  *       price:
+  *         type: number
+  *       code:
+  *         type: number
+  *       quantity:
+  *         type: number
+  *       new_price:
+  *         type: number
+  *       new_code:
+  *         type: number
+  *       promo_code:
+  *         type: string
+  * /ticketing/confirm/{reservation_id}?pin={wot_pin}:
+  *       post:
+  *         description: 'Confirms and logs the user transactions upon payment'
+  *         tags:
+  *           - confirm
+  *         consumes:
+  *           - 'application/json'
+  *         produces:
+  *           - 'application/json'
+  *         parameters:
+  *           - name: 'Ocp-Apim-Subscription-Key'
+  *             in: 'header'
+  *             description: 'APIM subscription key'
+  *             required: true
+  *             type: 'string'
+  *           - name: 'Authorization'
+  *             in: 'header'
+  *             description: 'JSON web token of user'
+  *             required: true
+  *             type: 'string'
+  *           - name: 'body'
+  *             in: 'body'
+  *             description: 'Request body'
+  *             required: true
+  *             schema:
+  *               $ref: '#/definitions/ConfirmTicketsRequest'
+  *         responses:
+  *           '200':
+  *             description: 'Successfully retrieved'
+  *             schema:
+  *               $ref: '#/definitions/ConfirmTicketsResponse'
+  */
+router.post('/:id', controller.index);
+
+/**
+  * @swagger
+  * definitions:
+  *   Status:
+  *     properties:
+  *       code:
+  *         type: number
+  *       description:
+  *         type: string
+  */
+
+module.exports = router;

@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>OSP Email Template</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body style="margin: 0; padding: 0;">
+  <table align="center" border="0" cellpadding="0" cellspacing="0" width="640" style="border-collapse: collapse;">
+  <tr>
+    <td>
+      <table>
+        <tr>
+          <td width="400px">
+            <img src="https://ospblobstorage.blob.core.windows.net/osp/temp/email_logo.png" alt="sentosa logo" height="60px" style="display: block;" />
+          </td>
+          <td width="240px">
+            <strong>Date of Purchase:</strong> {{purchase_date}}
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+   <td>
+    Receipt Number: <br /><br /><strong style="font-size: 14px">{{receipt_number}}</strong><br/><br/>
+   </td>
+  </tr>
+  <tr>
+   <td>
+    PIN Code(s):
+   </td>
+  </tr>
+  <tr>
+    <td>
+      <table width="100%">
+        {{pins}}
+        {{barcodes}}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Dear {{name}}, <br/>
+      There was an error processing your payment. Please keep this email as reference when seeking assistance with our friendly staff.<br/>
+      *This is an automatically generated email. Please do not reply as this mailbox is not monitored.
+      Your order details are summarized below:
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <table width="100%" cellpadding="5px">
+        <tr>
+          <td align="center" style="background: #2874A6; color: white; font-weight: bold">Personal Information</td>
+        </tr>
+        <tr>
+          <td>
+            <table width="100%">
+              <tr>
+                <td width="50%">
+                  Name: {{name}}<br/>
+                  Email: {{email}}<br/>
+                  Mobile Number: {{mobile}}<br/>
+                  Payment Type: {{payment}}<br/>
+                </td>
+                <td width="50%">
+
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            {{orders}}
+            <table width="100%">
+              <tr>
+                <td width="100%" align="right"><strong style="font-size: 16px">Grand Total (SGD): <span style="color: red"><strong>{{order_total}}</strong></span></strong></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size: 12px; color: grey">
+            <strong style="font-size: 16px">Notes</strong><br/><br/>
+            <strong>Upon redemption, please present the Credit Card used for purchase for verification purposes.</strong><br/><br/>
+            <strong>For a proxy to collect on your behalf, he/she needs to present:</strong><br/><br/>
+            <span style="padding-left: 10px">1. The printed confirmation letter</span></br>
+            <span style="padding-left: 10px">2. A <a href="https://ospblobstorage.blob.core.windows.net/osp/docs/LOA_Updated.docx">letter of authorisation</a> signed by you (the purchaser)</span><br/>
+            <span style="padding-left: 10px">3. His/her original NRIC/Passport/FIN Card</span><br/><br/>
+          </td>
+        </tr>
+        <tr>
+           <td style="font-size: 12px; color: grey; border: 1px solid grey; padding: 10px">
+             <strong style="font-size: 16px">Terms & Conditions</strong><br/>
+             <strong>General Terms & Conditions</strong><br/><br/>
+             Terms & Conditions
+<br/><br/>
+The following terms and conditions apply to your purchase of Sentosa tickets. By confirming your purchase, you agree to be bound by these terms and conditions.
+<br/><br/>
+<br/><strong>1. General Terms & Conditions</strong>
+<br/>1.1 Child price is applicable to children aged 3-12 years inclusive.
+<br/>1.2 For Universal Studios Singapore�, Adventure Cove Waterpark, S.E.A. Aquarium and Trick Eye Museum, child price is applicable to children aged 4-12 years inclusive.
+<br/>1.3 Island admission and transportation charges apply separately, unless otherwise stated.
+<br/>1.4 Tickets purchased are strictly non-refundable. This includes weather conditions.
+<br/>1.5 Lost or damaged card(s) will not be replaced or refunded.
+<br/><br/>
+1.6 Credit Card used for purchase will be required upon redemption for verification purposes.
+<br/><br/>
+1.7 Sentosa reserves the right to make changes without further notice to information herein.
+<br/><br/>
+�
+<br/><br/>
+<br/><strong>2. For Attractions</strong>
+<br/>2.1 Upon exchange of confirmation receipt for attraction tickets, all attraction tickets are only valid on the day of exchange.
+<br/>2.2 Purchases containing Universal Studios Singapore�, Adventure Cove Waterpark and S.E.A. Aquarium tickets, please redeem your tickets at Waterfront Ticketing Counter.
+<br/><br/>
+�
+<br/><br/>
+<br/><strong>3. Sentosa Fun Pass</strong>
+<br/><br/>
+<br/>3.1 Respective attractions' prevailing operating hours, ticketing, admission, payment and programme policies apply.
+<br/>3.2 Only the stated number of attractions can be utilized. Unused attractions will not be refunded or exchanged of any kind.
+<br/>3.3 Upon redemption of first attraction, the pass is valid within the day and time stipulated, or until closure of attractions, whichever is earlier. Any unused selections will not be refunded or carried over to another day or exchanged of any kind.
+<br/><br/>
+<br/>3.4�Each attraction is also limited to a one-time entry unless otherwise stated.�
+<br/><br/>
+<br/><strong>4. For Premium Fun Pass</strong>
+<br/>4.1 4D AdventureLand and Flavours of Singapore must be utilized within the day it is first redeemed, and cannot be carried over to the second day.
+<br/><br/>
+<br/><strong>5. For 2-Day Fun Pass</strong>
+<br/>5.1 Universal Studios Singapore opens daily at 10am.
+<br/>5.2 2-Day Play Pass must be utilised on the day purchased for, and over 2 consecutive days.
+<br/>5.3 The attractions within the Day Play Pass must be utilised within the day it is first redeemed, and cannot be carried over to the second day.
+<br/><br/>
+<br/><strong>6. Usage of Personal Data</strong>
+<br/>6.1 In order to process, administer and/or manage your booking with Sentosa Leisure Management Pte Ltd (?SLM?) and/or to achieve one or more of the Purposes (as defined below), SLM will necessarily need to collect, use, disclose and/or process your personal data or personal information about you. Such personal data includes information set out in this form and any other personal information relating to you that is provided by you or possessed by SLM, from time to time.
+<br/>6.2 SLM will/may collect, use, disclose and/or process your personal data for one or more of the following purposes:
+<br/>6.3 evaluating and/or processing your booking;
+<br/>6.4 administering, dealing with, managing and/or maintaining your booking with SLM including but not limited to administering and dealing with your booking, sharing your personal data with SLM Partners to administer and deal with your booking, contacting you through various modes of communication such as via phone/voice call, text message and/or fax message, email and/or postal mail for such purposes, dealing in any matters relating to your booking (including the mailing of correspondence, statements, information, invoices, or notices to you, which could involve disclosure of certain personal data about you to bring about delivery of the same), performing internal administrative, operational and technology tasks for the said purposes;
+<br/>6.5 providing and sending you marketing, advertising and/or promotional information and materials relating to your booking as well as products, attractions, events and/or services that SLM or SLM Partners may be selling, marketing, offering and/or promoting, on Sentosa island, via various modes of communication such as (a) postal mail to your postal address(es) and/or electronic transmission to your email address(es) (based on our records that we have of your postal address(es) and email address(es) or any new or amended postal or email address(es) that you may provide us with from time to time) and (b) via telephone/voice calls, SMS/MMS and/or facsimile to your telephone number(s) (based on our records that we have of your telephone number(s) or any new telephone number(s) that you may provide us with from time to time) with such telephone/voice calls, SMS/MMS and/or facsimile being sent in accordance with Singapore?s Personal Data Protection Act;
+<br/>6.6 dealing with or facilitating customer service, carrying out your instructions, or dealing with or responding to any enquiries given by you or on your behalf;
+<br/>6.7 complying with or as required by any applicable law, governmental or regulatory requirements of any relevant jurisdiction, including meeting the requirements to make disclosure under the requirements of any law binding on SLM or on SLM?s related corporations or associated companies (such as the Sentosa Development Corporation) and for the purposes of any guidelines issued by regulatory or other authorities, whether in Singapore or elsewhere, with which SLM or SLM?s related corporations or associated companies is/are expected to comply;
+<br/>6.8 producing statistics and research for internal and statutory reporting and/or record-keeping requirements; and
+<br/>6.9 conducting research, analysis and development activities (including but not limited to data analytics, surveys, product and service development and/or profiling) to improve SLM?s services or products and/or to enhance your membership experience via various modes of communication such as (a) postal mail to your postal address(es) and/or electronic transmission to your email address(es) (based on our records that we have of your postal address(es) and email address(es) or any new or amended postal or email address(es) that you may provide us with from time to time) and (b) via telephone/voice calls, SMS/MMS and/or facsimile to your telephone number(s) (based on our records that we have of your telephone number(s) or any new telephone number(s) that you may provide us with from time to time) with such telephone/voice calls, SMS/MMS and/or facsimile being sent in accordance with Singapore?s Personal Data Protection Act. (collectively the ?Purposes?).
+<br/>6.10 Your personal data may/will be disclosed by SLM to any of its third party service providers or agents or SLM?s related corporations? or associated companies? third party service providers or agents, which may be sited within or outside of Singapore, for one or more of the above Purposes, as such third party service providers or agents if engaged by SLM or by SLM?s related corporations or associated companies, as the case may be, would be processing your personal data for one or more of the Purposes.
+<br/>6.11 Where you have provided personal data of individuals other than yourself (such as personal data of your spouse or your family members), whether in the membership application form(s) or otherwise, you warrant and represent that the personal data of these individuals are legitimate and accurate, that you are valid acting on behalf of and have the authority from each of these individuals, and that you have obtained each of these individuals? consent, to disclose their personal data to SLM and for SLM to collect, use, disclose and process their personal data for the Purposes and in accordance to the terms herein.
+<br/><br/>
+<br/><strong>7. Usage of Tickets</strong>
+<br/>7.1 Only tickets purchased through Sentosa Online Store, Sentosa Ticketing Counters and authorized Sentosa resellers will be permitted for the obtainment of products or admission into attractions or events. If in doubt, please contact us or approach the Sentosa Ticketing Counters for assistance.
+<br/>7.2 Without prior permission from SLM, tickets purchased online shall not be reproduced, duplicated, copied, sold, traded, resold, transferred and exchanged for any purposes.
+<br/>7.3 Sentosa shall retain the sole discretion to refuse entry to any person(s) or to remove any person(s) from the premises (as the case may be), without refund or compensation if it is reasonably believed that the ticket used for admission is in breach of Clauses 6.1 and 6.2.
+<br/><br/>
+<br/><strong>8. Intellectual Property</strong>
+<br/>8.1 All information (such as documents, data, information, written words, images, software, music, audio files or other sounds, photographs, videos or other images) (hereinafter referred to as ?Information?) on the Sentosa Online Store are owned by SLM and shall not be disclosed without SLM?s prior written consent.
+<br/>8.2 Information may not be reproduced, distributed, adapted, modified, republished, displayed, broadcasted, hyperlinked, framed or transmitted in any manner or by any means or store in an information retrieval system, any part or parts of the Information without the prior written permission of SLM.
+<br/>8.3 Without prior written permission of SLM, Information may not be hyperlinked to any of the content on Sentosa Online Store or any other website or ?mirror? any Information contained on SLM?s website on any other server.
+<br/>8.4 Nothing herein shall be construed as SLM granting, by implication, estoppel, or otherwise, any license or right to you to use any of the Information displayed on Sentosa Online Store, without the written permission of SLM.
+<br/><br/>
+<br/>Sentosa Ticketing Counters*:
+<br/>? Beach Station
+<br/>? Imbiah Forecourt
+<br/>? Imbiah Lookout
+<br/>? Merlion Plaza
+<br/>? Sentosa Boardwalk
+<br/>? Sentosa Station (Vivocity, Lobby L, Level 3)
+<br/>? Sentosa Merlion
+<br/>? Waterfront Station
+<br/><br/>
+�
+<br/><br/>
+*Purchases containing Universal Studios Singapore�, Adventure Cove Waterpark and S.E.A. Aquarium tickets, please redeem your tickets at Waterfront Ticketing Counter.
+           </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+ </table>
+</body>
+</html>

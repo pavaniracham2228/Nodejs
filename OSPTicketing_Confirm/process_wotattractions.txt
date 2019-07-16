@@ -1,0 +1,263 @@
+const _ = require('lodash');
+const request = require('request');
+const json2xml = require('json2xml');
+const async = require('async');
+const { Order } = require('../orders/model');
+const logger = require('../../services/logger');
+const responseHandler = require('../../services/response');
+const { getWOTCapacity, toSACTDateTimeFormat } = require('../reserve/utility');
+const { voidSACTSales, voidWOTSales, releaseWOT, voidWirecardPayment, flagCriticalError } = require('./utility');
+const { confirmWOT, confirmTickets, processConfirmedTickets, processPartialConfirm } = require('./process_confirmations');
+const { confirmEmail } = require('./emailer');
+
+exports.processWOTAndAttractions = (res, req, wirecard, wot_pin, reservation_id, transaction_id, email_type, batch) => {
+  const wot_query = { 'pincode.wot': wot_pin }
+  // process wot first, check if capacity exceeds
+  Order.findOne(wot_query, { __v: 0, _id: 0 })
+    .exec((err, order) => {
+      if(!err)  {
+        if(order !== null)  {
+          // retrieve wot order
+          let attractions = order.attractions
+          let wot_attraction = null
+          _.filter(attractions, (attraction) => {
+            if(attraction.id === 490) {
+              wot_attraction = attraction
+            }
+          })
+
+          // format xml for capacity request
+          let items_xml = ""
+          _.filter(wot_attraction.tickets, (ticket) => {
+            let datetime = toSACTDateTimeFormat(ticket.date, ticket.time)
+            _.filter(ticket.types, (item) => {
+              let ticket_item = {
+                "EventItem": {
+                  "ItemCode": item.code,
+                  "ShowSchedule": datetime,
+                  "Capacity": "1" // tbc
+                }
+              }
+              let item_xml = json2xml(ticket_item)
+              items_xml += item_xml
+            })
+          })
+
+          let get_capacity_data_in = {
+            items_xml: items_xml,
+            req: req,
+            res: res
+          }
+
+          getWOTCapacity(get_capacity_data_in, function(err, response) {
+            if(!err)  {
+              let event_items = {} // dictionary to store unique event items
+              if(response.length > 1) { // if more than 1 event item
+                _.filter(response, (item) => {
+                  if(!(item['ItemCode'] in event_items)) {
+                    event_items[parseInt(item['ItemCode'])] = {}
+                    event_items[parseInt(item['ItemCode'])].capacity = parseInt(item['Capacity'])
+                  }
+                })
+              } else { // only 1 event item
+                event_items[parseInt(response['ItemCode'])] = {}
+                event_items[parseInt(response['ItemCode'])].capacity = parseInt(response['Capacity'])
+              }
+
+              // check if requested events exceeded capacity
+              let exceeded = false
+              let reserve_xml = ""
+              _.filter(wot_attraction.tickets, (ticket) => {
+                let datetime = toSACTDateTimeFormat(ticket.date, ticket.time)
+                _.filter(ticket.types, (item) => {
+                  if(parseInt(item.quantity) > event_items[item.code].capacity) { // request exceeded available
+                    exceeded = true
+                  }
+                })
+              })
+
+              if(!exceeded)  { // if not exceeded, proceed to confirm
+                let card_digits = req.body.digits
+                let wot_confirm_in = {
+                  name: order.name,
+                  email: order.email,
+                  contact: order.contact,
+                  order_id: order.order_id,
+                  receipt_number: order.receipt_number,
+                  card_digits: card_digits,
+                  wot_pin: wot_pin,
+                  transaction_id: transaction_id,
+                  res: res,
+                  req: req
+                }
+                confirmWOT(wot_confirm_in, function(err, confirm_wot_response) {
+                  if(!err)  {
+                    // confirm rest of attractions
+                    // formulate xml
+                    let tickets_xml = ""
+                    _.filter(attractions, (attraction) => {
+                      _.filter(attraction.tickets, (ticket) => {
+                        _.filter(ticket.types, (type) => {
+                          let ticket = {
+                            "BookingFee":  {
+                              "itemcode": 0,
+                              "BookingFee": 0,
+                              "Quantity": 0
+                            }
+                          }
+                          let ticket_xml = json2xml(ticket)
+                          tickets_xml += ticket_xml
+                        })
+                      })
+                    })
+                    let tickets_confirm_in = {
+                      tickets: tickets_xml,
+                      transaction_id: req.body.transaction_id,
+                      card_digits: req.body.digits,
+                      reservation_id: order.reservation_id,
+                      name: order.name,
+                      email: order.email,
+                      contact: order.contact,
+                      order_id: order.order_id,
+                      receipt_number: order.receipt_number,
+                      res: res,
+                      req: req
+                    }
+                    //console.log(tickets_confirm_in)
+                    confirmTickets(tickets_confirm_in, function(err, confirm_tickets_response) {
+                      if(!err && typeof confirm_tickets_response !== 'undefined')  {
+                        //console.log(confirm_tickets_response)
+                        //logger.log('sact', req.headers.correlation_id, null, 'info', { url: sact_req.uri.href, method: sact_req.method, headers: sact_req.headers, body: sact_req.body }, response.statusCode, response.body)
+                        processConfirmedTickets(res, req, reservation_id, wirecard, order, confirm_tickets_response, email_type, function(err, confirmed_order) {
+                          if(!err)  {
+                            batch ? console.log('batch (wot/attr)') : responseHandler.success(res, confirmed_order)
+                          } else { // err - partial
+                            console.log("voiding sact")
+                            var tasks = [];
+                            tasks.push(async.apply(voidSACTSales, reservation_id));
+                            tasks.push(async.apply(releaseWOT, order.receipt_number, wot_pin));
+
+                            if (wirecard) {
+                              tasks.push(async.apply(voidWirecardPayment, res, req.body.payment_timestamp, req.body.request_id, req.body.transaction_id));
+                            }
+
+                            async.parallel(tasks, (err, response) => {
+                              batch ? console.log('batch (wot/attr)') : responseHandler.confirmationUnsuccessful(res, { order_id: order.order_id });
+                            });
+                          }
+                        })
+                      } else { // retry
+                        setTimeout(function() {
+                          confirmTickets(tickets_confirm_in, function(err, confirm_tickets_response2) {
+                            if(!err)  {
+                              processConfirmedTickets(res, req, reservation_id, wirecard, order, confirm_tickets_response2, email_type, function(err, confirmed_order) {
+                                if(!err)  {
+                                  batch ? console.log('batch (wot/attr)') : responseHandler.success(res, confirmed_order)
+                                } else { // send partial order details
+                                  var tasks = [];
+                                  tasks.push(async.apply(voidSACTSales, reservation_id));
+                                  tasks.push(async.apply(releaseWOT, order.receipt_number, wot_pin));
+
+                                  if (wirecard) {
+                                    tasks.push(async.apply(voidWirecardPayment, res, req.body.payment_timestamp, req.body.request_id, req.body.transaction_id));
+                                  }
+
+                                  async.parallel(tasks, (err, response) => {
+                                    batch ? console.log('batch (wot/attr)') : responseHandler.confirmationUnsuccessful(res, { order_id: order.order_id })
+                                  });
+                                  console.log("error confirming tickets")
+                                  console.log(err)
+                                }
+                              })
+                            } else { // error confirming tickets - partial
+                              console.log("voiding sact")
+                              var tasks = [];
+                              tasks.push(async.apply(voidSACTSales, reservation_id));
+                              tasks.push(async.apply(releaseWOT, order.receipt_number, wot_pin));
+
+                              if (wirecard) {
+                                tasks.push(async.apply(voidWirecardPayment, res, req.body.payment_timestamp, req.body.request_id, req.body.transaction_id));
+                              }
+
+                              async.parallel(tasks, (err, response) => {
+                                batch ? console.log('batch (wot/attr)') : responseHandler.confirmationUnsuccessful(res, { order_id: order.order_id });
+                              });
+                              console.log("error confirming tickets")
+                              console.log(err)
+                            }
+                          })
+                        }, 3000)
+                      }
+                    })
+                  } else { // error confirming wot
+                    // responses handled within method
+                    var tasks = [];
+                    tasks.push(async.apply(voidSACTSales, reservation_id));
+                    tasks.push(async.apply(releaseWOT, order.receipt_number, wot_pin));
+
+                    if (wirecard) {
+                      tasks.push(async.apply(voidWirecardPayment, res, req.body.payment_timestamp, req.body.request_id, req.body.transaction_id));
+                    }
+
+                    async.parallel(tasks, (err, response) => {
+                      batch ? console.log('batch (wot/attr)') : responseHandler.confirmationUnsuccessful(res, { order_id: order.order_id });
+                    });
+                    console.log("error confirming wot")
+                    console.log(err)
+                  }
+                })
+              } else { // wot exceeded error
+                var tasks = [];
+                tasks.push(async.apply(voidSACTSales, reservation_id));
+                tasks.push(async.apply(releaseWOT, order.receipt_number, wot_pin));
+
+                if (wirecard) {
+                  tasks.push(async.apply(voidWirecardPayment, res, req.body.payment_timestamp, req.body.request_id, req.body.transaction_id));
+                }
+
+                async.parallel(tasks, (err, response) => {
+                  batch ? console.log('batch (wot/attr)') : responseHandler.insufficientCapacity(res);
+                });
+              }
+            } else { // get WOT capacity callback error
+              // responses handled within method
+              var tasks = [];
+              tasks.push(async.apply(voidSACTSales, reservation_id));
+              tasks.push(async.apply(voidWOTSales, order.receipt_number, wot_pin));
+
+              if (wirecard) {
+                tasks.push(async.apply(voidWirecardPayment, res, req.body.payment_timestamp, req.body.request_id, req.body.transaction_id));
+              }
+
+              async.parallel(tasks, (err, response) => {
+                batch ? console.log('batch (wot/attr)') : responseHandler.confirmationUnsuccessful(res, { order_id: order.order_id });
+              });
+              console.log("wot capacity callback error")
+            }
+          })
+        } else { // no order found for wot
+          flagCriticalError(res, reservation_id, transaction_id, 'order not found error')
+          batch ? console.log('batch (wot/attr)') : responseHandler.notFound(res)
+          console.log("no order found wot")
+          console.log(err)
+        }
+      } else { // db query error for wot order
+        var tasks = [];
+        tasks.push(async.apply(voidSACTSales, reservation_id));
+        //cannot void WOT cus order does not exist TO FIX NEXT TIME
+        //tasks.push(async.apply(voidWOTSales, order.order_id, wot_pin));
+
+        if (wirecard) {
+          tasks.push(async.apply(voidWirecardPayment, res, req.body.payment_timestamp, req.body.request_id, req.body.transaction_id));
+        }
+
+        async.parallel(tasks, (err, response) => {
+          flagCriticalError(res, reservation_id, transaction_id, 'db query error')
+          logger.log('cosmodb', res.req.headers.correlation_id, null, 'error', wot_query, null, err);
+          batch ? console.log('batch (wot/attr)') : responseHandler.serverError(res)
+        });
+        console.log("db query error")
+        console.log(err)
+      }
+    })
+}
